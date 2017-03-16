@@ -33,7 +33,7 @@
 
 ---
 
-# Aula 1 - 8/3
+# Aula 8/3
 
 Nesta aula mostraremos um exemplo de análise de algoritmos. Mostraremos porque as constantes podem ser ignoradas introduzindo a notação $\mathcal{O} ()$
     * CLRs 1.1, 1.2, 2.1, 2.2
@@ -228,7 +228,8 @@ Saída:
     \]
 
 ---
-# Aula 2 - 10/3
+
+# Aula 10/3
 
 **Continuação**
 **Notação $\Omega$:**
@@ -361,7 +362,7 @@ Vamos exemplificar o uso da técnica com o algoritmo **Mergesort**.
 2. **Conquista:** ordena recursivamente as subsequências
 3. **Combina:** intercala as subsequências ordenadas obtendo a sequência original ordenada.
 
-_Mergesort (A, p, r)_
+##### _Mergesort (A, p, r)_
 
 Rearranja os elementos de $A[p \dots r]$ para ordenação
 
@@ -389,7 +390,7 @@ Saída
 
 Para intercalar pegamos um ponteiro pro começo de cada subsequência e analisamos os número de 2 em 2 e ordenamos, precisa se pensar no caso de quando uma das subsequências ter sido percorrida por copleta.
 
-Intercala (A, p, q, r)
+##### Intercala (A, p, q, r)
 ```
     0. B[p ... r] é um vetor auxiliar
     1. para i <- p até q faça
@@ -406,3 +407,187 @@ Intercala (A, p, q, r)
     12.       A[k] <- B[j]
     10.       j <- j-1
 ```
+
+---
+
+# Aula 15/03
+
+Análise do consumo de tempo do Intercala. Se $n = r - p + 1$
+
+* Linhas 1-4 consumo $\theta(n)$
+* Linhas 5-6 conusmo $\theta(1)$
+* Linhas 7-13 consumo $\theta(n)$
+
+Portanto o consumo de tempo do Intercala é: $\theta(n)$.
+
+Análise do consumo de tempo do Mergesort. Se chamamos de $T(n)$ o tempo consumido pelo algoritmo para uma instância de tamanho $n$.
+
+* Linhas 1-2 consumo $\theta(1)$
+* Linhas 3 conusmo $T(\lfloor{\frac{n}{2}}\rfloor)$
+* Linhas 4 conusmo $T(\lceil{\frac{n}{2}}\rceil)$
+* Linhas 5 consumo $\theta(n)$
+
+\[
+    T(n) = T(\lfloor{\frac{n}{2}}\rfloor) + T(\lceil{\frac{n}{2}}\rceil) + \theta (n)
+\]
+
+_Como calculat $T(n)$?_
+
+Um método para calcular esse tipo de recorrência é o método da expansão:
+
+1. Restrinja-se a uma potência de 2
+2. Troque a notação $\theta(n)$ por $c_1.n$
+3. Use uma constante $c_2$ para $T(1)$
+1. Use expansão para encontrar "um chute"
+1. Verifique se sem chute está certo.
+
+Quando n é potencia de 2, $n = 2^k$ e $k = log n$
+\[
+    T(1) = c_2 \\
+    T(n) = 2.T(\frac{n}{2})+ c_1.n, \quad n > 1 \\
+    \begin{array}{lr}
+    \quad \quad \quad \quad = 2.\left[2.T(\frac{n}{4}) + c_1.\frac{n}{2}\frac{n}{2}\right] + c_1.n \\
+    \quad \quad \quad \quad = 4.T(\frac{n}{4}) + 2.c_1.n \\
+    \quad \quad \quad \quad \vdots \\
+    \quad \quad \quad \quad = 2^k.T(\frac{n}{2^k}) + k.c_1.n \\
+    \quad \quad \quad \quad = c_2.n + c1.n.log \ n \\
+    \quad \quad \quad \quad = \theta (n.log \ n)
+    \end{array}
+\]
+
+Vamos conferir:
+
+Para $n = 2^k \begin{cases} T(1) = c_2 \\ T(n) = 2.T(\frac{n}{2}) + c_1.n, & n > 1\end{cases}$
+
+Vale $T(n) = c_2.n + c1.n.log \ n$.
+
+**Prova por indução em k**
+
+_Base_: $k = 0, n= 1, T(1) = c_2 = c_2.1 + c_1.1.0$
+
+_Passo_: Tome $k \geq 1$
+
+\[
+    HI: T(2^{k-1}) = c_2.2^{k-1} + c_1.2^{k-1}.(k-1)
+\]
+Sabemos que
+
+\[
+    T(2^k) = 2.T(\frac{2^k}{2}) + c_1.2^k \\
+    = 2.T(2^{k-1}) + c_1.2^k \\
+    \overset{HI}{=} 2.\left(c_2.2^{k-1} + c_1.2^{k-1}.(k-1)\right) + c_1.2^k \\
+    = 2.c_2.2^{k-1} + 2.c_1.2^{k-1}.(k-1) + c_1.2^k \\
+    = c_2.2^k + c_1.(k-1).2^k + c_1.2^k \\
+    = c_2.2^k + c1.k.2^k \\
+    = c_2.n + c_1.n.log \ n_\blacksquare
+\]
+
+**Exercícios:**
+
+1.
+$T (n) =  \begin{cases}
+        c_1 &  n = 1 \\
+            T(\frac{n}{2}) + c_2  & n > 1\end{cases}$
+\[
+    T(1) = c_1 \\
+    n = 2^k
+\]
+
+Expandindo
+\[
+    T(n) = T(\frac{n}{2}) + c_2 \\
+    = \left( T(\frac{n}{4}) + c_2 \right) + c_2 \\
+    = T(\frac{n}{4}) + 2.c_2 \\
+    \vdots \\
+    = T(\frac{n}{2^k}) + k.c_2 = T(1) + k.c_2 \\
+    = c_1 + k.c_2 \Rightarrow \theta(1)
+\]
+
+Prova por indução
+
+Base: $n= 1, T(1)=c_1= c_1 + 0.c_2$
+Passo:
+\[
+    HI: T(2^{k-1}) = c_1 + (k-1).c_2 \\
+    \\
+    T(2^k) = T(\frac{2^k}{2}) + c_2 = T(2^{k-1}) + c_2 \\
+    (c_1 + (k-1).c_2) + c_2 = c_1 + k.c_2
+\]
+
+2. $T(n) = T(n-1) + \theta (n)$
+
+\[
+    T(1) = c_1 \\
+    \theta(n) = c_2.n
+\]
+
+Então, expandindo
+
+\[
+    T(n) = T(n-1) + c_2.n \\
+    = \left(T(n-2) + c_2.(n-1)\right) + c_2.n \\
+    = T(n-2) + c_2.n + c_2.(n-1)\\
+    = (T(n-3) + c_2.(n-2)) + + c_2.n + c_2.(n-1)
+    \vdots \\
+    = T(1) + 2.c_2 + 3.c_2 + \dots + (n-1).c_2 + n.c_2 \\
+    = c_1 + c_2 (2 + 3 + \dots + n) = c_1 + c_2.\left(\frac{(n-1).(n+1)}{2}\right)
+\]\
+
+Prova por indução
+
+Base: $n= 1, T(1) = c_1 = c_1 + c_2.(\frac{0.3}{2})$
+
+Passo :
+\[
+    HI: T(n-1) = c_1 + c_2.\left(\frac{(n-2).(n+1)}{2}\right)
+    \\
+    T (n) = T(n-1) + c_2.n \\
+    = c_1 + c2.\left(\frac{(n-1).(n-2)}{2} + n\right) \\
+    = c_1 + c_2.\left(\frac{n^2 -n -2 + 2n}{2}\right)\\
+    = c_1 + c_2.\left(\frac{n^2 + n -2}{2}\right)
+    = c_1 + c_2.\left(\frac{(n-1)(n+2)}{2}\right)_ \blacksquare
+\]
+
+Portanto essa recorrência descreve um algorimo $\theta(n^2)$
+
+3. $T(n) = 3.T (\lfloor\frac{n}{2}\rfloor) + \theta (n)$
+
+\[
+    n = 2^k \\
+    T(1) = c_1 \\
+    \theta(n) = c_2.n
+\]
+Então, expandindo
+\[
+    T(n) = 3.T(\frac{n}{2}) + c_2.n \\
+    = 3.(3.T(\frac{n}{4}) + c_2.\frac{n}{2})) + c_2.n \\
+    = 3^2.T(\frac{n}{4}) + 2.c_2.\frac{n}{2}) + c_2.n \\
+    \vdots \\
+    = 3^k.T(\frac{n}{2^k}) + \frac{3^{k-1}}{2^{k-1}}.c_2.n + \dots + \frac{3}{2}.c_2.n + c_2.n \\
+    3^k.c_1 +  c_2n.\left(\frac{3^{k-1}}{2^{k-1}}\ + \frac{3^{k-2}}{2^{k-2}} +  \dots + \frac{3}{2} + 1\right) \\
+    = 3^k.c_1  +  c_2.n.\left(\frac{\left(\frac{3^{k-1}}{2^{k-1}}\right) - 1}{\frac{3}{2} - 1}\right) \\
+    = 3^{log \ n}.c_1 + 2.c_2.(3^{log \ n} - n) \\
+\]
+Como $3 = 2^{log \ 3}$
+\[
+    = c_1.\left(2^{log \ 3 }\right)^{log \ n} + 2.c_2.\left(\left(2^{log \ 3 }\right)^{log \ n} - n\right) \\
+    = c_1.\left(2^{log \ n }\right)^{log \ 3} + 2.c_2.\left(\left(2^{log \ n }\right)^{log \ 3} - n\right) \\
+    = c_1.n^{log \ 3} + 2.c_2(n^{log \ 3} - n)
+\]
+Portanto, $T(n) = \theta (n^{log \ 3})$
+
+Prova por indução:
+
+Base: $n =1, T(n) = c1.1 + 2.c_2 (1 - 1) = c_1$
+
+Passo:
+
+\[
+    HI: T(2^{k-1}) = c_1.(2^{k-1})^{log \ 3} + 2.c_2. ((2^{k-1})^{log \ 3} - 2^{k-1}) \\
+    T(2^k) = 3.T(2^{k-1}) + c_2.2^k \\
+    = 3.c_1.(2^{k-1})^{log \ 3} + 3.2.c_2. ((2^{k-1})^{log \ 3} - 2^{k-1}) + c_2.2^k \\
+    = 3.c_1.(2^{k-1})^{log \ 3} + 3.2.c_2. (2^{k-1})^{log \ 3} -  3.2.c_2.2^{k-1} + c_2.2^k \\
+    = 3.c_1.(2^{k-1})^{log \ 3} + 3.2.c_2. (2^{k-1})^{log \ 3} -  3.c_2.2^{k} +  c_2.2^k  \\
+    = 2^{log \ 3}.c_1.(2^{k-1})^{log \ 3} + 2^{log \ 3}.2.c_2.(2^{k-1})^{log \ 3} - 2.c_2.2^k \\
+    = c_1.(2^{k})^{log \ 3} + 2.c_2.((2^{k})^{log \ 3} - 2^k)_ \blacksquare
+\]
