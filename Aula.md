@@ -591,3 +591,244 @@ Passo:
     = 2^{log \ 3}.c_1.(2^{k-1})^{log \ 3} + 2^{log \ 3}.2.c_2.(2^{k-1})^{log \ 3} - 2.c_2.2^k \\
     = c_1.(2^{k})^{log \ 3} + 2.c_2.((2^{k})^{log \ 3} - 2^k)_ \blacksquare
 \]
+
+---
+
+# Aula 17/03
+
+#### Quicksort
+
+Método de ordenação vaseada em Divisão e conquista.
+
+**Divide:** particione (rearranja)o vetor $A[p \dots r]$ em duaspartes $A[p \dots q-1]$ e $A[q+1 \dots r]$ de tal forma que os elementos de
+\[
+    A[p \dots q-1] \leq A[q] < A[q+1 \dots r]
+\]
+Devolve o índice q.
+
+**Conquista:** ordene $A[p \dots q-1]$ e $A[q+1 \dots r]$ recursivamente usando o Quicksort.
+
+**Combinação:** o vetor já está ordenado
+
+Quicksort(A, p, r)
+
+    1. se p < r
+    2.    q <- Particione (A, p, r)
+    3.    Quicksort (A, p, q-1)
+    4.    Quicksort (A, q+1, r)
+
+Como resolver o particione?
+
+PROBLEMA: Rearranjar os elementos de um vetor $A[p \dots r] e devolver $p \leq q \leq r$ tal que
+\[
+    A[p \dots q-1] \leq A[q] < A[q+1 \dots r]
+\]
+
+Entra:
+
+99 | 33| 55 | 77 | 11 | 22 | 88| 66 | 33 | 44 |
+--- | --- | --- | --- | --- | --- | --- | --- | --- | ---|
+
+Sai:
+
+11 | 33| 22| 33 | **44** | 99 | 55| 77 | 88 | 66 |
+--- | --- | --- | --- | --- | --- | --- | --- | --- | ---|
+
+**Código:** Particione (A, p, r)
+
+    1. x <- A[r]
+    2. i <- p - 1
+    3. para j <- p até r faça
+    4.    se A[j] <= x
+    5.        i <- i + 1
+    6.        A[i] <-> A[j]
+    7. devolve i
+
+#### Análise de desempenho
+
+####Particione
+
+* Linhas 1-2 consumo $\theta(1)$
+* Linhas 3-4 consumo $\theta(n)$
+* Linhas 5-6 consumo $\mathcal{O}(n)$
+* Linhas 7 consumo $\theta(1)$
+
+Portanto consome tempo $\theta(n)$
+
+####Quicksort
+
+Se chamarmos de T(n) o tempo consumido pelo Quicksort para uma instância de n elementos, teremos:
+
+$T(n) = \begin{cases}
+            1, & n = 1\\
+            T(k) + T(n - k - 1) + \theta(n), & n \geq 2
+        \end{cases}$
+onde k =  q - p
+
+#####Pior caso
+
+Seja $T_{MAX}(n)$ o tempo de pior caso do quicksort para uma instância de tamanho n.
+
+Alguém pode chutar que o pior caso ocorre quando o particione devolve sempre a última posição $(q=r)$.
+
+$T_{MAX}(n) = \begin{cases}
+                1, & n = 1\\
+                T_{MAX}(n-1) + \theta(n), & n\geq2
+                \end{cases}$
+
+_Exercício:_ $T_{MAX}(n) = \theta (n^2)$
+
+Sendo mais cuidadoso
+
+$T_{MAX}(n) = \begin{cases}
+                1, & n = 1\\
+                \underset{0 \leq k \leq n-1}{max}\left\{T_{MAX}(k) + T_{MAX}(n-k-1)\right\} + \theta(n), & n\geq2
+                \end{cases}$
+
+n | 0 |1 | 2| 3|
+--- | ---| ---| ---| --|
+| $T_{MAX}(n) $ |1 | 1| {1 + 1, 1 + 1} = 4 | {1 + 4, 1 + 1, 1 + 4} = 8
+
+Vamos mostrar que
+\[
+    T_{MAX}(n) \leq n^2 + 1
+\]  
+
+Prova: Indução em n
+
+Base: n = 0, n= 1
+
+Passo:
+\[
+    HI: \text{ Para qualquer} k < n \Rightarrow T_{MAX}(n) \leq n^2 + 1
+\]
+Tome $n > 1$
+\[
+    T_{MAX}(n) = \underset{0 \leq k \leq n-1}{max}\left\{T_{MAX}(k) + T_{MAX}(n-k-1)\right\} + n \\
+    \overset{HI}{\leq} \underset{0 \leq k \leq n-1}{max} \left\{ k^2 + 1 + (n-k-1)^2 + 1\right\} + n \\
+    \leq \underset{0 \leq k \leq n-1}{max}\left\{k^2 + 1 + n^2 - 2nk - 2n + k^2 - 2k + 1 + 1\right\} + n \\
+    \leq \underset{0 \leq k \leq n-1}{max}\left\{2k^2 (-2n +2)k + n^2 - 2n + 3\right\} + n
+\]
+
+Máximo da função de segundo grau
+\[
+    f(k) = 2k^2 (-2n +2)k + n^2 - 2n + 3, \quad 0\leq k\leq n-1 \\
+    f'(k) = 4k + (-2n+2) \\
+    f''(k) = 4 > 0, \text{ portanto máximo está nos extremos}
+    \\
+    f(0) = n^3 - 2n + 3 \\
+    f(n-1) = 2(n-1)^2 + (-2 + 2)(n-1) + n^2 - 2n +3 - 2(n-1)
+\]
+Pontos de máximo 0 e n-1. Então
+\[
+    T_{MAX}(n) \leq n^2n + 3 + n \leq n^2 - n + 3 \\
+    \text{Como } -n + 3 < 1\\
+    \leq n^2 + 1
+\]
+
+Portanto o consumo de tempo no pior caso é $\mathcal{O} (n^2)$
+_Exercício:_ $T_{MAX}(n) \geq \frac{n^2}{2}, \ n \geq 1$
+
+Portanto o consumo de tempo no pior caso é $\theta (n^2)$
+
+#####Melhor caso
+
+Seja $T_{MIN}(n)$ o consumo de tempo de mehor caso  Quicksort para uma instância de tamanho n.
+
+\[
+    T_{MIN}(n) = \underset{0 \leq k \leq n-1}{min} \left\{ T_{MIN}(k) + T_{MIN}(n - k -1)\right\}  + n, \ n \geq 2
+\]
+ Vamos mostrar que $T_{MIN}(n) \geq (n+1)log (n+1), n \geq 1
+
+ Base: n = 0, n=1 OK
+
+ Passo
+ \[
+ HI: \text{Para } k < n  \text{ vale }  T_{MIN}(k) \geq (k+1) . log(k+1) \\
+ T_{MIN}(n) = \underset{0 \leq k \leq n-1}{min} \left\{ T_{MIN}(k) + T_{MIN}(n - k -1)\right\}  + n
+  \\
+ \geq \underset{0 \leq k \leq n-1}{min} \left\{ (k+1).log(k+1) + (n - k -1).log(n-k-1)\right\}  + n \\
+ \]
+
+ Mínimo da função:
+ _Exercicio_
+
+ Com isso, o consumo de tempo de melhor caso do Quicksort é $\Omega (n.log \ n)$
+
+##### Conclusão
+ Com isso, o consumo de tempo do Quicksort é $\mathcal{O}(n^2)$ e $\Omega (n.log \ n)$
+
+##### Caso médio
+
+Apesar do consumo de tempo de pior caso do Quicksort ser $\theta(n^2)$, sua performance prática é comparável a algoritmos cujo consumo de tempo é $\theta(n.log \ n)$.
+\[
+    \text{Por que?}
+\]
+
+Vamos supor que o particione sempre garante, por exemplo, $\frac{1}{3}$ da seqência de um lado e $\frac{2}{3}$ do outro.
+
+Considere a recorrência
+
+$T(n) = \begin{cases}
+        1, & n = 1\\
+        T(\left\lceil \frac{n}{3} \right\rceil) + T(\left\lfloor \frac{2n}{3} \right\rfloor)+ n, & n \geq 2
+        \end{cases}$
+
+Árvore de recorrência
+\[
+    n \\
+    \swarrow  \ \searrow \\
+    \frac{n}{3} \quad  \quad \frac{2n}{3} \\
+    \swarrow  \ \searrow \quad \swarrow  \ \searrow \\
+    \frac{n}{9} \quad  \quad \frac{2n}{9} \frac{2n}{9} \quad  \quad \frac{4n}{9} \\
+    \vdots \quad \quad \quad \vdots \quad \quad \vdots \quad \quad \quad \vdots
+\]
+
+O número de níceis desta árvore é o maior k tal que $\frac{2^k.n}{3^k} = 1$ ou seja, $\leq k = log_\frac{3}{2} n$
+
+Voltando a recorrência
+
+n | 0 | 1 | 2 | 3 | 4 |
+--- | ---| ---| --| --| -|
+$T(n)$ | $1$ | $1 $| $4$ | $1+ 4 + 3 = 8$| $4 +8+4 = 16$
+
+$T(n) \leq 20.n.log \ n, n \geq 2$
+
+Prova:
+
+Base: n = 2 OK
+
+Passo: Toma $n> 2$
+
+\[
+    HI : T(k) \leq 20.k.log \ k
+    \\
+    T(n) = T(\left\lceil \frac{n}{3}\right\rceil) + T(\left\lfloor \frac{2n}{3}\right\rfloor) + n
+    \\
+    \leq 20.\left\lceil \frac{n}{3}\right\rceil.log\left\lceil \frac{n}{3}\right\rceil + 20.\left\lfloor \frac{2n}{3}\right\rfloor.log \left\lfloor \frac{2n}{3}\right\rfloor + n
+    \\
+    \leq 20.\left(\frac{n+2}{3}\right)\left\lceil\log \frac{n}{3}\right\rceil + 20.\frac{2n}{3}.log \frac{2n}{3} + n
+    \\
+    \leq 20.\left(\frac{n+2}{3}\right).\left(\log \frac{n}{3} + 1\right) + 20.\frac{2n}{3}.log \frac{2n}{3} + n
+    \\
+    \leq 20.\left(\frac{n+2}{3}\right).\log \frac{2n}{3}+ 20.\frac{2n}{3}.log \frac{2n}{3} + n
+    \\
+    = 20.n.log\frac{2n}{3} + \frac{40}{3}.log \frac{2n}{3} + n  
+    \\
+    < 20.n.log\frac{2n}{3} +14.log \frac{2n}{3} + n
+    \\
+    20.n.log \ n + 20.n.log\frac{2}{3} + 14.log \ n +14.log \frac{2}{3} + n
+    \\
+    log\frac{2}{3} = - 0.584\dots
+    \\
+    < 20.n.log \ n - 11,6n + n + 14.log \ n - 8,12
+    \\
+    < 20.n.log \ n \underbrace{- 10n + 14.log \ n - 8}_{< 0 }
+    \\
+    < 20.n.log \ n
+\]
+
+##### Análise
+* Linhas 1 consumo $\theta(1)$
+* Linhas 2 consumo $\theta(n)$
+* Linhas 1-2 consumo $\theta()$
