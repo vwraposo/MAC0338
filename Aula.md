@@ -446,7 +446,7 @@ Quando n é potencia de 2, $n = 2^k$ e $k = log n$
     T(1) = c_2 \\
     T(n) = 2.T(\frac{n}{2})+ c_1.n, \quad n > 1 \\
     \begin{array}{lr}
-    \quad \quad \quad \quad = 2.\left[2.T(\frac{n}{4}) + c_1.\frac{n}{2}\frac{n}{2}\right] + c_1.n \\
+    \quad \quad \quad \quad = 2.\left[2.T(\frac{n}{4}) + c_1.\frac{n}{2}\right] + c_1.n \\
     \quad \quad \quad \quad = 4.T(\frac{n}{4}) + 2.c_1.n \\
     \quad \quad \quad \quad \vdots \\
     \quad \quad \quad \quad = 2^k.T(\frac{n}{2^k}) + k.c_1.n \\
@@ -527,7 +527,7 @@ Então, expandindo
     T(n) = T(n-1) + c_2.n \\
     = \left(T(n-2) + c_2.(n-1)\right) + c_2.n \\
     = T(n-2) + c_2.n + c_2.(n-1)\\
-    = (T(n-3) + c_2.(n-2)) + + c_2.n + c_2.(n-1)
+    = (T(n-3) + c_2.(n-2)) + c_2.n + c_2.(n-1) \\
     \vdots \\
     = T(1) + 2.c_2 + 3.c_2 + \dots + (n-1).c_2 + n.c_2 \\
     = c_1 + c_2 (2 + 3 + \dots + n) = c_1 + c_2.\left(\frac{(n-1).(n+1)}{2}\right)
@@ -687,7 +687,7 @@ $T_{MAX}(n) = \begin{cases}
 
 n | 0 |1 | 2| 3|
 --- | ---| ---| ---| --|
-| $T_{MAX}(n) $ |1 | 1| {1 + 1, 1 + 1} = 4 | {1 + 4, 1 + 1, 1 + 4} = 8
+| $T_{MAX}(n)$ |1 | 1| {1 + 1, 1 + 1} = 4 | {1 + 4, 1 + 1, 1 + 4} = 8
 
 Vamos mostrar que
 \[
@@ -738,7 +738,7 @@ Seja $T_{MIN}(n)$ o consumo de tempo de mehor caso  Quicksort para uma instância
 \[
     T_{MIN}(n) = \underset{0 \leq k \leq n-1}{min} \left\{ T_{MIN}(k) + T_{MIN}(n - k -1)\right\}  + n, \ n \geq 2
 \]
- Vamos mostrar que $T_{MIN}(n) \geq (n+1)log (n+1), n \geq 1
+ Vamos mostrar que $T_{MIN}(n) \geq (n+1)log (n+1), n \geq 1$
 
  Base: n = 0, n=1 OK
 
@@ -828,7 +828,128 @@ Passo: Toma $n> 2$
     < 20.n.log \ n
 \]
 
-##### Análise
-* Linhas 1 consumo $\theta(1)$
-* Linhas 2 consumo $\theta(n)$
-* Linhas 1-2 consumo $\theta()$
+---
+
+# Aula 22/03
+
+### Análise Probabilística
+
+Vamos mostar comom fazer análises probabilísticas usando como exemplo uma função que acha o máximo de um vetor com inteiros positivos.
+
+$\max(A, m, n)$
+```
+1. max <- 0
+2. para i <- até n faça
+3.    se A[i] > max
+4.      max <- A[i]
+5. devolve max
+```
+
+O número de vezes que a linha 4 é executada depende da permutação dada em A. A linha executa pelo menos uma vez e no máximo $n$ vezes.
+
+#### Caso médio
+
+Suponha que $A[1\dots n]$ é uma permutação aleatória uniforme de $[1 \dots n]$, ou seja, cada permutação ocorre com probabilidade igual $\frac{1}{n!}$
+
+Lembrando....
+
+$(S, Pr)$ é um espaço de probabilidades.
+
+* $S$: conjunto finito de eventos
+* $Pr$: função de $S\rightarrow [0, 1]$
+    * $Pr\{s\} \geq 0, \ \forall s \in S$
+    * $Pr\{S\} = 1$ onde $Pr\{U\} = \sum_{u\in U} Pr\{u\}$
+    * $R, T \subseteq S, \ R \cap T = \varnothing
+    \\
+    Pr\{R\cup T\} = Pr\{R\} + Pr\{T\}$
+
+
+No caso do máximo
+\[
+    S := \text{conjunto de todas as permutações de} [1\dots n] \\
+    Pr\{s\} = $\frac{1}{n!}$, \ \forall s \in S
+\]
+
+Exemplo:
+
+\[
+    U:= \{\text{permutação de } [1\dots n] \text{ com que} A[n] \text{é o máximo}\}\\
+    Pr\{U\} = \frac{(n-1)!}{n!} = \frac{1}{n}
+\]
+
+Uma variável aleatória é uma função numérica definida sobre eventos
+
+$X(A) :=$ número de vezes que a linha 4 é executada em $\max(A, k)$
+
+Quando escrevemos "$X = k$" estamos nos referindo ao conjunto de eventos de $S$ para os quais o valor da variável é $k$
+\[
+    \{s \in S | X(s) = k\}
+\]
+
+Exemplo
+
+"X = 1" = {permutação em que o máximo caia em A[1]}
+
+"X = n" = {permutação em que $A[1] < A[2] < A[3] ...$}
+
+A esperança de uma variável aleatória X denotada por $E[X]$.
+\[
+    E[X] = \sum_{k \in X(S)} k.Pr\{X = k\} = \sum_{s \in S} X(s).Pr{s}
+\]
+
+Linearidade da esperança:
+\[
+    E[X+Y] = E[X]+E[Y] \\
+    E[\alpha X] = \alpha E[X]
+\]
+
+Seja
+\[
+    X_i := \begin {cases}
+                    1 \text{ se } \max <- A[i]\text{ é executada}\\
+                    0  \ c.c\end{cases}
+\]
+Então
+\[
+    X = X_1 + X_2 + X_3 + \dots + X_n
+\]
+Qual a probabilidade de $X_i = 1$? $\Rightarrow \frac{1}{i}$
+
+\[
+    E[X] = E[X_1 + X_2 + X_3 + \dots + X_n] = \\
+    E[X_1] + E[X_2] + E[X_3] + \dots + E[X_n] = \\
+    = 1 + \frac{1}{2} + \frac{1}{3} + \dots + \frac{1}{n} \\
+    \leq \int_1^n \frac{1}{x}dx = 1 + ln \ n
+\]  
+
+### Voltando ao quicksort
+
+Vamos considerar que cada permutação $A$ de $[1\dots n]$ tem a mesma probabilidade.
+
+Se $X(A)$ é o número total de vezes que a linha 4 do Particione é executada na chamada do Quicksort (A, n)).
+
+Vamos calcular $E[X]$
+
+Seja
+\[
+    X_{ab} = \begin{cases}1 \text { se a eb são comparado na linha 4} \\ 0 \text{ c.c} \end{cases}
+\]  
+
+Então
+\[
+    X = \sum^{n-1}_{a=1}\sum^n_{b =a + 1} X_{ab} \\
+    E[X] = E[ \sum^{n-1}_{a=1}\sum^n_{b =a + 1} X_{ab}] =  \sum^{n-1}_{a=1}\sum^n_{b =a + 1} E[X_{ab}]
+\]
+
+$X_{ab} = 1$ sse a ou b forem pivô antes de qualquer elemento em $a+1 \dots b-1$
+
+$Pr\{x \in [a, b]\text{ seja pivô}\} = \frac{1}{b-a+1}$
+
+\[  
+    E[X] =  \sum^{n-1}_{a=1}\sum^n_{b =a + 1} \frac{2}{b-a+1} \\
+    = 2\sum^{n-1}_{a=1}\sum^n_{b =a + 1} \frac{1}{b-a+1} \\
+    = 2. \sum^{n-1}_{a=1} \left(\frac{1}{2} + \frac{1}{3} + \dots \frac{1}{n-a+1}\right) \\
+    < 2. \sum^{n-1}_{a=1} ln \ n < 2(n-1)\ln{n} = \mathcal{O}(n\ln n)
+\]
+
+O consumo de tempo esperado do Quicksort quando a permutação é escolhida uniformente é $\mathcal{O}(n\ln n)$
